@@ -128,7 +128,7 @@ namespace netcore2_logging.Services
             };
 
             //Write to DB
-            int success = _connection.Insert(InsertData);
+            var success = _connection.Insert(InsertData);
         }
 
 

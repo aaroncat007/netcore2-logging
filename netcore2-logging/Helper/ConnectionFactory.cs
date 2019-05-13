@@ -15,6 +15,10 @@ namespace netcore2_logging.Helper
 
     public class ConnectionFactory : IDisposable, IConnectionFactory
     {
+        public ConnectionFactory()
+        {
+            DapperExtensions.DapperExtensions.SqlDialect = new DapperExtensions.Sql.MySqlDialect();
+        }
 
         private IDbConnection connection;
 
