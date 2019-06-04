@@ -68,8 +68,11 @@ namespace netcore2_logging.Services
 
         ~LogServices()
         {
-            _connection.Close();
-            _connection = null;
+            if (_connection != null)
+            {
+                _connection.Close();
+                _connection = null;
+            }
         }
 
         /// <summary>

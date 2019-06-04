@@ -54,7 +54,7 @@ namespace netcore2_logging.Controllers
             }
 
             //logging
-            _logger.WriteLog<object>(HttpContext.Request.QueryString.Value, "查詢書籍", null, resultBookList);
+            _logger.WriteLog<object>(HttpContext.Request.QueryString.Value, "Get Books", null, resultBookList);
 
             return resultBookList;
         }

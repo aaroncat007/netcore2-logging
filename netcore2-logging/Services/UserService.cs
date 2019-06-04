@@ -1,5 +1,7 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Dapper;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using MySql.Data.MySqlClient;
 using netcore2_logging.Helper;
 using System;
 using System.Collections.Generic;
@@ -18,24 +20,37 @@ namespace netcore2_logging.Services
 
     public class UserService : IUserService
     {
-        // 假資料
-        private List<UserModel> _users = new List<UserModel>
-        {
-            new UserModel { Id = 1, FirstName = "Test", LastName = "User", Username = "test", Password = "test",Birthdate = new DateTime(1992,1,1) } ,
-            new UserModel { Id = 1, FirstName = "Child", LastName = "User", Username = "kid", Password = "test",Birthdate = new DateTime(2010,1,1) }
-        };
+        /// <summary>
+        /// DB連線
+        /// </summary>
+        private MySqlConnection _connection;
 
         private readonly JWTSettings _JWTSettings;
 
-        public UserService(IOptions<JWTSettings> appSettings)
+        public UserService(IOptions<JWTSettings> appSettings,IConnectionFactory connectionFactory)
         {
             _JWTSettings = appSettings.Value;
+            _connection = (MySqlConnection)connectionFactory.CreateConnection();
+        }
+
+        ~UserService()
+        {
+            if (_connection != null)
+            {
+                _connection.Close();
+                _connection = null;
+            }
         }
 
         public UserModel Authenticate(LoginModel loginModel)
         {
             //執行登入動作
-            var user = _users.SingleOrDefault(x => x.Username == loginModel.Username && x.Password == loginModel.Password);
+            var sqlStr = $"SELECT * FROM users where Username=@username AND Password=@password";
+            UserModel user = _connection.QueryFirstOrDefault<UserModel>(sqlStr,
+                new {
+                    username = loginModel.Username,
+                    password = loginModel.Password
+                });
 
             // return null if user not found
             if (user == null)
@@ -80,11 +95,9 @@ namespace netcore2_logging.Services
     public class UserModel
     {
         public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
         public string Username { get; set; }
         public string Password { get; set; }
-        public string Token { get; set; }
         public DateTime Birthdate { set; get; }
+        public string Token { get; set; }
     }
 }
